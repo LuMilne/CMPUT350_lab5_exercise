@@ -60,6 +60,11 @@ std::vector<Point2D> ctrl_pts = {
 // TODO: (Part 2) Track animation time for the square moving along the curve.
 // TODO: (Part 3) Track the index of the control point being dragged.
 
+float getDistance(sf::Event::MouseButtonPressed* click, int i) {
+    Point2D here = Point2D(click->position);
+    return sqrt(pow(here.x - ctrl_pts[i].x, 2) + pow(here.y - ctrl_pts[i].y, 2));
+}
+
 void handleInput(sf::Window& window, bool& shouldQuit) {
     while (const std::optional<sf::Event> event = window.pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
@@ -67,6 +72,13 @@ void handleInput(sf::Window& window, bool& shouldQuit) {
             shouldQuit = true;
         } else if (const auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
             // TODO: (Part 3) On left-click, select the closest control point
+            if(mouse.button == sf::Mouse::Button::Left) {
+                int handle;
+                if(getDistance(mouse,1) > getDistance(mouse,2)) {
+                    handle = 1;
+                }
+                else {handle = 2;}
+            }
             // using mouse->position and start dragging it.
         } else if (const auto* mouse = event->getIf<sf::Event::MouseButtonReleased>()) {
             // TODO: (Part 3) On left-button release, stop dragging.
@@ -132,6 +144,7 @@ void render(sf::RenderWindow& window) {
     // TODO: (Part 3) Draw control handles from point 1 to 2 and point 3 to 4.
     // TODO: (Part 4) Draw all connected cubic Bezier segments and their handles.
     // ====== ====== ======
+    
 
     // ====== ====== ======
     // TODO: (Bonus) Support multiple curves, a Galaga screen overlay at a 1:2 ratio, and exporting
