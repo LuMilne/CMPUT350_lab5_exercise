@@ -12,9 +12,25 @@ const int FPS_LIMIT = 30;
 
 using Point2D = sf::Vector2f;
 
+float pos = 0.f;
+float vel = 0.01f;
+
+void updatePosition() {
+    if(0.f > pos+vel) {
+        pos = 0.f;
+        vel *= -1;
+    }
+    else if (pos+vel > 1.f) {
+        pos = 1;
+        vel *= -1;
+    }
+    else {pos += vel;}
+    return;
+}
+
 // TODO: (Part 1) Define a function that samples a cubic Bezier curve at t in [0, 1].
 Point2D getPoint(const std::vector<Point2D>& pts, float t) { 
-    assert( pts.size() >= 4 );  // t in [0,1]
+    assert(pts.size() >= 4);  // t in [0,1]
     assert(0 <= t && t <= 1);   // cubic Bezier needs at least 4 points
 
     float x = pow(1-t, 3)*pts[0].x + 3*pow(1-t, 2)*t*pts[1].x + 3*(1-t)*t*t*pts[2].x + pow(t,3)*pts[3].x;
@@ -24,7 +40,15 @@ Point2D getPoint(const std::vector<Point2D>& pts, float t) {
 }
 
 // TODO: (Part 2) Define a function that returns the curve's slope at t in [0, 1].
-Point2D getSlope(const std::vector<sf::Vector2f>& pts, float t) { return Point2D{}; }
+Point2D getSlope(const std::vector<Point2D>& pts, float t) { 
+    assert(pts.size() >= 4);  // t in [0,1]
+    assert(0 <= t && t <= 1);   // cubic Bezier needs at least 4 points
+
+    float slope_x = 3*pow(1-t,3)*(pts[1].x-pts[0].x) + 6*(1-t)*t*(pts[2].x-pts[1].x) + 3*t*t*(pts[3].x-pts[2].x);
+    float slope_y = 3*pow(1-t,3)*(pts[1].y-pts[0].y) + 6*(1-t)*t*(pts[2].y-pts[1].y) + 3*t*t*(pts[3].y-pts[2].y);
+
+    return Point2D{slope_x,slope_y}; 
+}
 
 // TODO: (Part 1) Store four control points for the curve.
 std::vector<Point2D> ctrl_pts = {
@@ -76,15 +100,27 @@ void render(sf::RenderWindow& window) {
     for(auto pt : ctrl_pts) {
         sf::CircleShape point = sf::CircleShape(10.f);
         point.setFillColor(sf::Color::Red);
-        point.setPosition(pt);
+        point.setPosition(Point2D{pt.x-0.5f, pt.y-0.5f});
         window.draw(point);
     }
-
 
     // ====== ====== ======
     // TODO: (Part 2) Draw a small square moving repeatedly along the curve.
     // Use GetSlope to orient it to the curve at each time step.
     // ====== ====== ======
+    sf::RectangleShape square(Point2D{10.f,10.f});
+
+    // Position along the line
+    updatePosition();
+    Point2D pt = getPoint(ctrl_pts,pos);
+    square.setPosition(Point2D{pt.x-5.f, pt.y-5.f});
+
+    // Angle at position
+    Point2D slope = getSlope(ctrl_pts,pos);
+    sf::Angle angle = sf::radians(std::atan(slope.y/slope.x));
+    square.setRotation(angle);
+
+    window.draw(square);
 
     // ====== ====== ======
     // TODO: (Part 3) Draw control handles from point 1 to 2 and point 3 to 4.
