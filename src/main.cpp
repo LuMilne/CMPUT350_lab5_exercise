@@ -52,10 +52,10 @@ Point2D getSlope(const std::vector<Point2D>& pts, float t) {
 
 // TODO: (Part 1) Store four control points for the curve.
 std::vector<Point2D> ctrl_pts = {
-    Point2D{0.f,0.f},
-    Point2D{WINDOW_WIDTH*0.75f, WINDOW_HEIGHT*0.25f},
-    Point2D{WINDOW_WIDTH*0.25f, WINDOW_HEIGHT*0.75f},
-    Point2D{WINDOW_WIDTH,WINDOW_HEIGHT}
+    Point2D{10.f,10.f},
+    Point2D{(WINDOW_WIDTH-20.f)*0.75f, (WINDOW_HEIGHT-20.f)*0.25f},
+    Point2D{(WINDOW_WIDTH-20.f)*0.25f, (WINDOW_HEIGHT-20.f)*0.75f},
+    Point2D{WINDOW_WIDTH-20.f,WINDOW_HEIGHT-20.f}
 };
 // TODO: (Part 2) Track animation time for the square moving along the curve.
 // TODO: (Part 3) Track the index of the control point being dragged.
@@ -98,9 +98,9 @@ void render(sf::RenderWindow& window) {
     window.draw(line.data(), line.size(), sf::PrimitiveType::Lines);
     // Draw points
     for(auto pt : ctrl_pts) {
-        sf::CircleShape point = sf::CircleShape(10.f);
+        sf::CircleShape point = sf::CircleShape(5.f);
         point.setFillColor(sf::Color::Red);
-        point.setPosition(Point2D{pt.x-0.5f, pt.y-0.5f});
+        point.setPosition(Point2D{pt.x-5.f, pt.y-5.f});
         window.draw(point);
     }
 
@@ -108,17 +108,23 @@ void render(sf::RenderWindow& window) {
     // TODO: (Part 2) Draw a small square moving repeatedly along the curve.
     // Use GetSlope to orient it to the curve at each time step.
     // ====== ====== ======
-    sf::RectangleShape square(Point2D{10.f,10.f});
 
-    // Position along the line
+    // Prepare values
+    sf::RectangleShape square(Point2D{10.f,10.f});
+    square.setOrigin(Point2D{5.f,5.f});
     updatePosition();
     Point2D pt = getPoint(ctrl_pts,pos);
-    square.setPosition(Point2D{pt.x-5.f, pt.y-5.f});
-
-    // Angle at position
     Point2D slope = getSlope(ctrl_pts,pos);
+
+    // std::cout << "position: (" << pt.x << ',' << pt.y << ")\n";
+
+    // Set position along the line
+    square.setPosition(Point2D{pt.x,pt.y});
+
+    // Set angle at position
     sf::Angle angle = sf::radians(std::atan(slope.y/slope.x));
     square.setRotation(angle);
+    // std::cout << "square: (" << square.getPosition().x << ',' << square.getPosition().y << ")\n";
 
     window.draw(square);
 
